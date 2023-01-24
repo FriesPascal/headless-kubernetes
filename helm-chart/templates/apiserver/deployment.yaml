@@ -54,7 +54,7 @@ spec:
             - --service-account-key-file=/etc/kubernetes/signing/tls.crt
             - --service-account-signing-key-file=/etc/kubernetes/signing/tls.key
             - --service-account-issuer=https://{{ include "headless-kubernetes.fullname" . }}-apiserver:443
-            - --service-cluster-ip-range={{ .Values.cluster.services.clusterIpCidr }}
+            - --service-cluster-ip-range={{ .Values.cluster.clusterIpServiceCidr }}
             - --service-node-port-range={{ .Values.cluster.nodePortRange }}
             - --tls-cert-file=/etc/kubernetes/server-auth/tls.crt
             - --tls-private-key-file=/etc/kubernetes/server-auth/tls.key

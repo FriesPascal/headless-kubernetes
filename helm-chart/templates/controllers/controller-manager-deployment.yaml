@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-controller-manager
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: controller-manager
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.controllers.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller-manager
+      {{- include "headless-kubernetes.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: controller-manager
+        {{- include "headless-kubernetes.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: k8s.gcr.io/kube-controller-manager:v1.24.4
+          name: kube-controller-manager
+          command:
+            - kube-controller-manager
+            - --allocate-node-cidrs=true
+            - --bind-address=0.0.0.0
+            - --cluster-cidr={{ .Values.cluster.podCidr }}
+            - --cluster-name=kubernetes
+            - --cluster-signing-cert-file=/etc/kubernetes/ca/tls.crt
+            - --cluster-signing-key-file=/etc/kubernetes/ca/tls.key
+            - --kubeconfig=/etc/kubernetes/config.yaml
+            - --leader-elect=true 
+            - --root-ca-file=/etc/kubernetes/ca/ca.crt
+            - --service-account-private-key-file=/etc/kubernetes/signing/tls.key
+            - --service-cluster-ip-range={{ .Values.cluster.clusterIpServiceCidr }} 
+            - --use-service-account-credentials=true 
+            - --v=2
+          securityContext:
+            runAsUser: 1002
+            runAsGroup: 1002
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: client-auth
+              mountPath: /etc/kubernetes/client-auth
+            - name: config
+              mountPath: /etc/kubernetes/config.yaml
+              subPath: config.yaml
+            - name: kubernetes-ca
+              mountPath: /etc/kubernetes/ca
+            - name: signing-keys
+              mountPath: /etc/kubernetes/signing
+      restartPolicy: Always
+      volumes:
+        - name: client-auth
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-controller-manager
+        - name: config
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-controllers
+        - name: kubernetes-ca
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-kubernetes-ca
+        - name: signing-keys
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-signing-keys

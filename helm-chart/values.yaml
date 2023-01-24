@@ -29,7 +29,7 @@ controllers:
 
 cluster:
   eventTtl: 1h
-  services:
-    clusterIpCidr: 10.32.0.0/24
-    kubernetesClusterIp: 10.32.0.1
+  podCidr: 10.200.0.0/16
+  clusterIpServiceCidr: 10.32.0.0/24
+  kubernetesServiceClusterIp: 10.32.0.1
   nodePortRange: 30000-32767

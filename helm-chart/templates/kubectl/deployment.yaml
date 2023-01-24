@@ -36,17 +36,17 @@ spec:
             - -c
             - sleep infinity
           volumeMounts:
+            - name: client-auth
+              mountPath: /etc/kubernetes/client-auth
             - name: config
               mountPath: /etc/kubernetes/config.yaml
               subPath: config.yaml
-            - name: client-auth
-              mountPath: /etc/kubernetes/client-auth
       restartPolicy: Always
       volumes:
-        - name: config
-          configMap:
-            name: {{ include "headless-kubernetes.fullname" . }}-kubectl
         - name: client-auth
           secret:
             secretName: {{ include "headless-kubernetes.fullname" . }}-kubectl
+        - name: config
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-kubectl
 {{ end }}

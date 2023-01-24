@@ -29,7 +29,7 @@ spec:
     - {{ quote . }}
   {{- end }}
   ipAddresses:
-    - {{ quote .Values.cluster.services.kubernetesClusterIp }}
+    - {{ quote .Values.cluster.kubernetesServiceClusterIp }}
   {{- range .Values.apiserver.additionalIpAddresses }}
     - {{ quote . }}
   {{- end }}
