@@ -8,12 +8,12 @@ metadata:
     {{- include "headless-kubernetes.labels" . | nindent 4 }}
 spec:
   dnsNames:
-    - {{ include "headless-kubernetes.fullname" . }}-etcd
-    - {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
-    - *.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery
-    - {{ include "headless-kubernetes.fullname" . }}-etcd.{{ .Release.Namespace }}.svc.cluster.local
-    - {{ include "headless-kubernetes.fullname" . }}-etcd-discovery.{{ .Release.Namespace }}.svc.cluster.local
-    - *.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery.{{ .Release.Namespace }}.svc.cluster.local
+    - "{{ include "headless-kubernetes.fullname" . }}-etcd"
+    - "{{ include "headless-kubernetes.fullname" . }}-etcd-discovery"
+    - "*.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery"
+    - "{{ include "headless-kubernetes.fullname" . }}-etcd.{{ .Release.Namespace }}.svc.cluster.local"
+    - "{{ include "headless-kubernetes.fullname" . }}-etcd-discovery.{{ .Release.Namespace }}.svc.cluster.local"
+    - "*.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery.{{ .Release.Namespace }}.svc.cluster.local"
   duration: 730h0m0s
   issuerRef:
     name: {{ include "headless-kubernetes.fullname" . }}-etcd-ca
