@@ -12,6 +12,7 @@ metadata:
   {{- end }}
 spec:
   replicas: 3
+  revisionHistoryLimit: 3
   strategy:
     rollingUpdate:
       maxSurge: 0
@@ -31,13 +32,13 @@ spec:
         - image: k8s.gcr.io/kube-apiserver:v1.24.4
           name: apiserver
           command:
-            - kube-apiserver    
+            - kube-apiserver
             - --allow-privileged=true
             - --authorization-mode=Node,RBAC
             - --bind-address=0.0.0.0
             - --client-ca-file=/etc/kubernetes/kubelet-client-auth/ca.crt
             - --enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
-            - --endpont-reconciler-type=none
+            - --endpoint-reconciler-type=none
             - --etcd-cafile=/etc/kubernetes/etcd-client-auth/ca.crt
             - --etcd-certfile=/etc/kubernetes/etcd-client-auth/tls.crt
             - --etcd-keyfile=/etc/kubernetes/etcd-client-auth/tls.key
@@ -46,7 +47,7 @@ spec:
             - --encryption-provider-config=/etc/kubernetes/encryption/config.yaml
             - --kubelet-certificate-authority=/etc/kubernetes/kubelet-client-auth/ca.crt
             - --kubelet-client-certificate=/etc/kubernetes/kubelet-client-auth/tls.crt
-            - --kubelet-client-key=/etc/kubernetes/pki/kubelet-client-auth/tls.key
+            - --kubelet-client-key=/etc/kubernetes/kubelet-client-auth/tls.key
             - --kubelet-preferred-address-types=InternalIP
             - --runtime-config=api/all=true
             - --secure-port=443
