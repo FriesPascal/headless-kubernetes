@@ -24,8 +24,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: bitnami/kubectl:1.24.4
-          name: kubectl
+        - name: kubectl
+          image: "{{ .Values.kubectl.image.repository }}:{{ .Values.kubectl.image.tag }}"
+          imagePullPolicy: {{ .Values.kubectl.image.pullPolicy }}
           env:
             - name: KUBECONFIG
               value: /etc/kubernetes/config.yaml

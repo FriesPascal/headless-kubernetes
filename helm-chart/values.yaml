@@ -4,8 +4,21 @@ etcd:
   persistence:
     storageClass: local-path
     size: 5Gi
+  images:
+    etcd:
+      repository: gcr.io/etcd-development/etcd
+      pullPolicy: IfNotPresent
+      tag: v3.5.4
+    busybox:
+      repository: busybox
+      pullPolicy: IfNotPresent
+      tag: 1.28
 
 apiserver:
+  image:
+    repository: k8s.gcr.io/kube-apiserver
+    pullPolicy: IfNotPresent
+    tag: v1.24.4
   nodePort: 31000
   encryptionKey: "OIfQqr2yRU/6r246L1p+PWDY40dsxJsP7MlsNsG8N+g="
   additionalDnsNames:
@@ -13,9 +26,22 @@ apiserver:
   additionalIpAddresses: []
 
 kubectl:
+  image:
+    repository: bitnami/kubectl
+    pullPolicy: IfNotPresent
+    tag: 1.24.4
   enabled: true
 
 controllers:
+  images:
+    controllerManager:
+      repository: k8s.gcr.io/kube-controller-manager
+      pullPolicy: IfNotPresent
+      tag: v1.24.4
+    scheduler:
+      repository: k8s.gcr.io/kube-scheduler
+      pullPolicy: IfNotPresent
+      tag: v1.24.4
 
 cluster:
   eventTtl: 1h

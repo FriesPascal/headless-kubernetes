@@ -27,8 +27,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: k8s.gcr.io/kube-controller-manager:v1.24.4
-          name: kube-controller-manager
+        - name: kube-controller-manager
+          image: "{{ .Values.controllers.images.controllerManager.repository }}:{{ .Values.controllers.images.controllerManager.tag }}"
+          imagePullPolicy: {{ .Values.controllers.images.controllerManager.pullPolicy }}
           command:
             - kube-controller-manager
             - --allocate-node-cidrs=true

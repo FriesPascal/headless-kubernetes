@@ -27,8 +27,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: k8s.gcr.io/kube-scheduler:v1.24.4
-          name: kube-scheduler
+        - name: kube-scheduler
+          image: "{{ .Values.controllers.images.scheduler.repository }}:{{ .Values.controllers.images.scheduler.tag }}"
+          imagePullPolicy: {{ .Values.controllers.images.scheduler.pullPolicy }}
           command:
             - kube-scheduler
             - --config=/etc/kubernetes/config.yaml

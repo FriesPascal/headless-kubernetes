@@ -27,7 +27,8 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: wait-for-dns
-          image: busybox:1.28
+          image: "{{ .Values.etcd.images.busybox.repository }}:{{ .Values.etcd.images.busybox.tag }}"
+          imagePullPolicy: {{ .Values.etcd.images.busybox.pullPolicy }}
           securityContext:
             capabilities:
               drop: [ALL]
@@ -63,8 +64,9 @@ spec:
                     nslookup $ETCD_NAME.$ETCD_DISCOVERY_SRV | grep $ETCD_NAME && break
                 done
       containers:
-        - image: gcr.io/etcd-development/etcd:v3.5.4
-          name: etcd
+        - name: etcd
+          image: "{{ .Values.etcd.images.etcd.repository }}:{{ .Values.etcd.images.etcd.tag }}"
+          imagePullPolicy: {{ .Values.etcd.images.etcd.pullPolicy }}
           securityContext:
             capabilities:
               drop: [ALL]

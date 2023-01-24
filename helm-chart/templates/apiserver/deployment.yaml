@@ -27,8 +27,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: k8s.gcr.io/kube-apiserver:v1.24.4
-          name: apiserver
+        - name: apiserver
+          image: "{{ .Values.apiserver.image.repository }}:{{ .Values.apiserver.image.tag }}"
+          imagePullPolicy: {{ .Values.apiserver.image.pullPolicy }}
           command:
             - kube-apiserver
             - --allow-privileged=true
