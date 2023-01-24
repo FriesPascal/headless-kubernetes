@@ -10,8 +10,8 @@ spec:
   isCA: true
   commonName: Kubernetes CA
   secretName: {{ include "headless-kubernetes.fullname" . }}-kubernetes-ca
-  duration: 87600h
-  renewBefore: 2160h
+  duration: 87600h0m0s
+  renewBefore: 2160h0m0s
   privateKey:
     algorithm: ECDSA
     size: 256

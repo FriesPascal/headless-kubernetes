@@ -10,8 +10,8 @@ spec:
   isCA: true
   commonName: etcd CA
   secretName: {{ include "headless-kubernetes.fullname" . }}-etcd-ca
-  duration: 87600h
-  renewBefore: 2160h
+  duration: 87600h0m0s
+  renewBefore: 2160h0m0s
   privateKey:
     algorithm: ECDSA
     size: 256

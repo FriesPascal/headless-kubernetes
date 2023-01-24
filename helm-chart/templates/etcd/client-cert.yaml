@@ -10,8 +10,11 @@ spec:
   dnsNames:
     - {{ include "headless-kubernetes.fullname" . }}-etcd
     - {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
-    - "*.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery"
-  duration: 730h
+    - *.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+    - {{ include "headless-kubernetes.fullname" . }}-etcd.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ include "headless-kubernetes.fullname" . }}-etcd-discovery.{{ .Release.Namespace }}.svc.cluster.local
+    - *.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery.{{ .Release.Namespace }}.svc.cluster.local
+  duration: 730h0m0s
   issuerRef:
     name: {{ include "headless-kubernetes.fullname" . }}-etcd-ca
     kind: Issuer
@@ -19,7 +22,7 @@ spec:
   privateKey:
     algorithm: ECDSA
     size: 256
-  renewBefore: 120h
+  renewBefore: 120h0m0s
   secretName: {{ include "headless-kubernetes.fullname" . }}-etcd-client
   usages:
     - server auth
