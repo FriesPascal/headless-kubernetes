@@ -6,5 +6,9 @@ metadata:
   labels:
     app.kubernetes.io/component: pki
     {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.pki.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   selfSigned: {}

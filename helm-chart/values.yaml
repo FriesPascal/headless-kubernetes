@@ -1,1 +1,7 @@
-# wow, so much empty
+pki:
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+
+etcd:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"

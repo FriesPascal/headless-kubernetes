@@ -6,6 +6,10 @@ metadata:
   labels:
     app.kubernetes.io/component: etcd
     {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.etcd.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   dnsNames:
     - "{{ include "headless-kubernetes.fullname" . }}-etcd-discovery"
