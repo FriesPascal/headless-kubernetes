@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-signing-keys
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: pki
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.pki.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  commonName: signing keys for ServiceAccountTokens
+  secretName: {{ include "headless-kubernetes.fullname" . }}-signing-keys
+  duration: 87600h
+  renewBefore: 2160h0m0s
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - signing
+  issuerRef:
+    name: {{ include "headless-kubernetes.fullname" . }}-signing-keys
+    kind: Issuer
+    group: cert-manager.io

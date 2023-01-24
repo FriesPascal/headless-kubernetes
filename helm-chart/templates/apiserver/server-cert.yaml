@@ -1,0 +1,41 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-apiserver
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: apiserver
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.apiserver.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  commonName: kubernetes
+  secretName: {{ include "headless-kubernetes.fullname" . }}-apiserver
+  duration: 8760h0m0s
+  renewBefore: 120h0m0s
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  dnsNames:
+    - "kubernetes"
+    - "kubernetes.default"
+    - "kubernetes.default.svc"
+    - "kubernetes.default.svc.cluster"
+    - "kubernetes.default.svc.cluster.local"
+    - "{{ include "headless-kubernetes.fullname" . }}-apiserver"
+  {{- range .Values.apiserver.additionalDnsNames }}
+    - {{ quote . }}
+  {{- end }}
+  ipAddresses:
+    - {{ quote .Values.cluster.services.kubernetesClusterIp }}
+  {{- range .Values.apiserver.additionalIpAddresses }}
+    - {{ quote . }}
+  {{- end }}
+  usages:
+    - server auth
+  issuerRef:
+    name: {{ include "headless-kubernetes.fullname" . }}-kubernetes-ca
+    kind: Issuer
+    group: cert-manager.io

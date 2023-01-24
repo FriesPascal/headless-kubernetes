@@ -10,9 +10,21 @@ etcd:
     size: 5Gi
 
 apiserver:
+  nodePort: 31000
+  encryptionKey: "OIfQqr2yRU/6r246L1p+PWDY40dsxJsP7MlsNsG8N+g="
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+  additionalDnsNames:
+    - kubernetes.atix-training.de
+  additionalIpAddresses: []
 
 controllers:
   annotations:
     argocd.argoproj.io/sync-wave: "3"
+
+cluster:
+  eventTtl: 1h
+  services:
+    clusterIpCidr: 10.32.0.0/24
+    kubernetesClusterIp: 10.32.0.1
+  nodePortRange: 30000-32767
