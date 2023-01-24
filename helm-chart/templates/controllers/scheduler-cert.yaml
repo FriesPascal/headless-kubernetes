@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-scheduler
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: scheduler
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.controllers.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  commonName: system:kube-scheduler
+  secretName: {{ include "headless-kubernetes.fullname" . }}-scheduler 
+  duration: 8760h0m0s
+  renewBefore: 120h0m0s
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - client auth
+  issuerRef:
+    name: {{ include "headless-kubernetes.fullname" . }}-kubernetes-ca
+    kind: Issuer
+    group: cert-manager.io

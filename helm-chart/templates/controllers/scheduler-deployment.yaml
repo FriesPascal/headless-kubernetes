@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-scheduler
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: scheduler
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  {{- with .Values.controllers.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: scheduler
+      {{- include "headless-kubernetes.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: scheduler
+        {{- include "headless-kubernetes.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: k8s.gcr.io/kube-scheduler:v1.24.4
+          name: kube-scheduler
+          command:
+            - kube-scheduler
+            - --config=/etc/kubernetes/config.yaml
+            - --v=2
+          securityContext:
+            runAsUser: 1003
+            runAsGroup: 1003
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: client-auth
+              mountPath: /etc/kubernetes/client-auth
+            - name: config
+              mountPath: /etc/kubernetes/config.yaml
+              subPath: config.yaml
+            - name: kubeconfig
+              mountPath: /etc/kubernetes/kubeconfig.yaml
+              subPath: config.yaml
+      restartPolicy: Always
+      volumes:
+        - name: client-auth
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-scheduler
+        - name: config
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-scheduler
+        - name: kubeconfig
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-controllers
