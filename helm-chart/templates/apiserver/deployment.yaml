@@ -61,7 +61,7 @@ spec:
             - --v=2
           ports:
             - name: https
-              containerPort: 31000
+              containerPort: 443
           securityContext:
             runAsUser: 1001
             runAsGroup: 1001
