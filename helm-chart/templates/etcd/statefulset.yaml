@@ -41,17 +41,24 @@ spec:
             - sh
             - -c
             - |
-                echo "Checking DNS records for $ETCD_DISCOVERY_SRV..."
+                echo "Checking CoreDNS records for $ETCD_DISCOVERY_SRV..."
                 while true; do
-                    sleep 10
+                    # Wait 30 seconds for CoreDNS to flush old cached records. This
+                    # is necessary, e.g., on restarts because IP addresses will change.
+                    # The timeout coincides with the default CoreDNS TTL in kubernetes.
+                    sleep 30
                     echo ""
                     echo ""
+                    # We need to ensure that there are SRV and A records for self. The former
+                    # are for etcd auto-discovery. The latter is for actual communication. An
+                    # SRV record of "_etcd-client-ssl" is used by the etcdctl CLI, while the
+                    # "_etcd-server-ssl" record is for clustering.
                     echo "_etcd-client-ssl (SRV):" && \
                     nslookup _etcd-client-ssl._tcp.$ETCD_DISCOVERY_SRV | grep $ETCD_NAME && \
                     echo "_etcd-server-ssl (SRV):" && \
                     nslookup _etcd-server-ssl._tcp.$ETCD_DISCOVERY_SRV | grep $ETCD_NAME && \
                     echo "$ETCD_NAME (A):" && \
-                    nslookup $ETCD_NAME.$ETCD_DISCOVERY_SRV && break
+                    nslookup $ETCD_NAME.$ETCD_DISCOVERY_SRV | grep $ETCD_NAME && break
                 done
       containers:
         - image: gcr.io/etcd-development/etcd:v3.5.4
