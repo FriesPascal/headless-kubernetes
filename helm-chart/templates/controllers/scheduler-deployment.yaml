@@ -6,10 +6,8 @@ metadata:
   labels:
     app.kubernetes.io/component: scheduler
     {{- include "headless-kubernetes.labels" . | nindent 4 }}
-  {{- with .Values.controllers.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    helm.sh/hook-weight: "2"
 spec:
   replicas: 3
   strategy:

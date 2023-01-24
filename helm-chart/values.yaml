@@ -1,10 +1,6 @@
 pki:
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 
 etcd:
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
   persistence:
     storageClass: local-path
     size: 5Gi
@@ -12,20 +8,14 @@ etcd:
 apiserver:
   nodePort: 31000
   encryptionKey: "OIfQqr2yRU/6r246L1p+PWDY40dsxJsP7MlsNsG8N+g="
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
   additionalDnsNames:
     - kubernetes.atix-training.de
   additionalIpAddresses: []
 
 kubectl:
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
   enabled: true
 
 controllers:
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 
 cluster:
   eventTtl: 1h
