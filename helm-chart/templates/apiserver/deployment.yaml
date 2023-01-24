@@ -24,7 +24,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/component: apiserver
-        {{- include "headless-kubernetes.selectorLabels" . | nindent 6 }}
+        {{- include "headless-kubernetes.selectorLabels" . | nindent 8 }}
     spec:
       automountServiceAccountToken: false
       containers:

@@ -13,7 +13,7 @@ metadata:
 spec:
   commonName: signing keys for ServiceAccountTokens
   secretName: {{ include "headless-kubernetes.fullname" . }}-signing-keys
-  duration: 87600h
+  duration: 87600h0m0s
   renewBefore: 2160h0m0s
   privateKey:
     algorithm: ECDSA
