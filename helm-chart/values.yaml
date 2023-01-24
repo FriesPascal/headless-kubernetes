@@ -18,6 +18,11 @@ apiserver:
     - kubernetes.atix-training.de
   additionalIpAddresses: []
 
+kubectl:
+  annotations:
+    argocd.argoproj,io/sync-wave: "2"
+  enabled: true
+
 controllers:
   annotations:
     argocd.argoproj.io/sync-wave: "3"
