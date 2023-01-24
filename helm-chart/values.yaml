@@ -5,3 +5,14 @@ pki:
 etcd:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+  persistence:
+    storageClass: local-path
+    size: 5Gi
+
+apiserver:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+
+controllers:
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"

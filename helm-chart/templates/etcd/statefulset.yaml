@@ -190,7 +190,7 @@ spec:
         name: data
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: local-path
+        storageClassName: {{ .Values.etcd.persistence.storageClass }}
         resources:
           requests:
-            storage: 25Mi
+            storage: {{ .Values.etcd.persistence.size }}
