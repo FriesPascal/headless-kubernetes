@@ -20,12 +20,12 @@ apiserver:
 
 kubectl:
   annotations:
-    argocd.argoproj,io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "2"
   enabled: true
 
 controllers:
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 
 cluster:
   eventTtl: 1h
