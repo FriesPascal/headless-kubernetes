@@ -21,6 +21,6 @@ spec:
   usages:
     - signing
   issuerRef:
-    name: {{ include "headless-kubernetes.fullname" . }}-signing-keys
+    name: {{ include "headless-kubernetes.fullname" . }}-selfsigned
     kind: Issuer
     group: cert-manager.io
