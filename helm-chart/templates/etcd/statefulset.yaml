@@ -1,0 +1,185 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-etcd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: etcd
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+spec:
+  replicas: 3
+  serviceName: {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: etcd
+      {{- include "headless-kubernetes.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: etcd
+        {{- include "headless-kubernetes.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-dns
+          image: busybox:1.28
+          securityContext:
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: ETCD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: ETCD_DISCOVERY_SRV
+              value: {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+          command:
+            - sh
+            - -c
+            - |
+                echo "Checking DNS records for $ETCD_DISCOVERY_SRV..."
+                while true; do
+                    sleep 10
+                    echo ""
+                    echo ""
+                    echo "_etcd-client-ssl (SRV):" && \
+                    nslookup _etcd-client-ssl._tcp.$ETCD_DISCOVERY_SRV | grep $ETCD_NAME && \
+                    echo "_etcd-server-ssl (SRV):" && \
+                    nslookup _etcd-server-ssl._tcp.$ETCD_DISCOVERY_SRV | grep $ETCD_NAME && \
+                    echo "$ETCD_NAME (A):" && \
+                    nslookup $ETCD_NAME.$ETCD_DISCOVERY_SRV && break
+                done
+      containers:
+        - image: gcr.io/etcd-development/etcd:v3.5.4
+          name: etcd
+          securityContext:
+            capabilities:
+              drop: [ALL]
+              add: [NET_BIND_SERVICE]
+          env:
+            - name: ETCD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: ETCD_DISCOVERY_SRV
+              value: {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+            - name: ETCDCTL_DISCOVERY_SRV
+              value: {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+            - name: ETCD_INITIAL_CLUSTER_TOKEN
+              value: token
+            - name: ETCD_TRUSTED_CA_FILE
+              value: /etc/etcd/tls/client/ca.crt
+            - name: ETCDCTL_CACERT
+              value: /etc/etcd/tls/client/ca.crt
+            - name: ETCD_CERT_FILE
+              value: /etc/etcd/tls/client/tls.crt
+            - name: ETCDCTL_CERT
+              value: /etc/etcd/tls/client/tls.crt
+            - name: ETCD_KEY_FILE
+              value: /etc/etcd/tls/client/tls.key
+            - name: ETCDCTL_KEY
+              value: /etc/etcd/tls/client/tls.key
+            - name: ETCD_PEER_TRUSTED_CA_FILE
+              value: /etc/etcd/tls/peer/ca.crt
+            - name: ETCD_PEER_CERT_FILE
+              value: /etc/etcd/tls/peer/tls.crt
+            - name: ETCD_PEER_KEY_FILE
+              value: /etc/etcd/tls/peer/tls.key
+            - name: ETCDCTL_API
+              value: "3"
+          command:
+            - sh
+            - -c
+            - |
+                # check if cluster already exists
+                POD_ID=`echo -n $ETCD_NAME | sed 's/.*-//'`
+                ETCD_INITIAL_CLUSTER_STATE="existing"
+                if [ "$POD_ID" = "0" ]; then 
+                    echo "Checking cluster state by looking up /."
+                    etcdctl get / 2>&1 | grep 'connection refused' && ETCD_INITIAL_CLUSTER_STATE="new"
+                fi
+                export ETCD_INITIAL_CLUSTER_STATE=$ETCD_INITIAL_CLUSTER_STATE
+                echo "Discovered cluster state is $ETCD_INITIAL_CLUSTER_STATE."
+
+                # if cluster exists and self not already a member, add self to the cluster
+                if [ "$ETCD_INITIAL_CLUSTER_STATE" = "existing" ]; then
+                    echo "Checking for existing member records for $ETCD_NAME."
+                    MEMBER_ID=`etcdctl member list | grep $ETCD_NAME | awk -F ', ' '{ print $1 }'`
+
+                    if [ -z "$MEMBER_ID" ]; then
+                        echo "Not yet a member, adding self as learner."
+                        etcdctl member add $ETCD_NAME --learner --peer-urls=https://$ETCD_NAME.$ETCD_DISCOVERY_SRV:2380
+                        MEMBER_ID=`etcdctl member list | grep $ETCD_NAME | awk -F ', ' '{ print $1 }'`
+                    fi
+
+                    IS_LEARNER=`etcdctl member list | grep $ETCD_NAME | awk -F ', ' '{ print $6 }'`
+                    [ "$IS_LEARNER" = "true" ] && while true; do
+                        sleep 5
+                        echo "Trying to promote self (memberID $MEMBER_ID)."
+                        etcdctl member promote $MEMBER_ID && break
+                    done &
+                fi
+
+                # run etcd
+                etcd --data-dir=/var/lib/etcd/data \
+                     --listen-client-urls=https://0.0.0.0:2379 \
+                     --advertise-client-urls=https://$ETCD_NAME.$ETCD_DISCOVERY_SRV:2379 \
+                     --listen-peer-urls=https://0.0.0.0:2380 \
+                     --initial-advertise-peer-urls=https://$ETCD_NAME.$ETCD_DISCOVERY_SRV:2380 \
+                     --client-cert-auth \
+                     --peer-client-cert-auth \
+                     --listen-metrics-urls=http://0.0.0.0:2381
+          ports:
+            - name: client
+              containerPort: 2379
+            - name: peer
+              containerPort: 2380
+            - name: metrics
+              containerPort: 2381
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 1
+            successThreshold: 1
+            httpGet:
+              scheme: HTTP
+              port: metrics
+              path: /health
+          livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 3
+            successThreshold: 1
+            httpGet:
+              scheme: HTTP
+              port: metrics
+              path: /health
+          volumeMounts:
+            - name: client-certs
+              mountPath: /etc/etcd/tls/client
+            - name: peer-certs
+              mountPath: /etc/etcd/tls/peer
+            - name: data
+              mountPath: /var/lib/etcd/data
+      restartPolicy: Always
+      volumes:
+        - name: client-certs
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-etcd-client
+        - name: peer-certs
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-etcd-peer
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 25Mi

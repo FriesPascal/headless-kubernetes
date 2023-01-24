@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-selfsigned
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: pki
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}

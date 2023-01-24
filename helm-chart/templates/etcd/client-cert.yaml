@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-etcd-client
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: etcd
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+    - {{ include "headless-kubernetes.fullname" . }}-etcd
+    - {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+    - "*.{{ include "headless-kubernetes.fullname" . }}-etcd-discovery"
+  duration: 730h
+  issuerRef:
+    name: {{ include "headless-kubernetes.fullname" . }}-etcd-ca
+    kind: Issuer
+    group: cert-manager.io
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  renewBefore: 120h
+  secretName: {{ include "headless-kubernetes.fullname" . }}-etcd-client
+  usages:
+    - server auth
+    - client auth

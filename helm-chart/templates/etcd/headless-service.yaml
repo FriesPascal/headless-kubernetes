@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: etcd
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - name: etcd-client-ssl
+      targetPort: client
+      port: 2379
+    - name: etcd-server-ssl
+      targetPort: peer
+      port: 2380
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: etcd
+    {{- include "headless-kubernetes.selectorLabels" . | nindent 4 }}
+  type: ClusterIP
