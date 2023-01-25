@@ -9,7 +9,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "1"
 spec:
-  replicas: 3
+  replicas: {{ .Values.etcd.replicas }}
   serviceName: {{ include "headless-kubernetes.fullname" . }}-etcd-discovery
   selector:
     matchLabels:

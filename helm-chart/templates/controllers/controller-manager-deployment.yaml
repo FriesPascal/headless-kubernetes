@@ -9,7 +9,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "2"
 spec:
-  replicas: 3
+  replicas: {{ .Values.controllerManager.replicas }}
   strategy:
     rollingUpdate:
       maxSurge: 0
@@ -28,8 +28,8 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: kube-controller-manager
-          image: "{{ .Values.controllers.images.controllerManager.repository }}:{{ .Values.controllers.images.controllerManager.tag }}"
-          imagePullPolicy: {{ .Values.controllers.images.controllerManager.pullPolicy }}
+          image: {{ .Values.controllerManager.image.repository }}:{{ .Values.controllerManager.image.tag | default (printf "v%s" .Values.cluster.version) }}
+          imagePullPolicy: {{ .Values.controllerManager.image.pullPolicy }}
           command:
             - kube-controller-manager
             - --allocate-node-cidrs=true

@@ -9,7 +9,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "2"
 spec:
-  replicas: 3
+  replicas: {{ .Values.apiserver.replicas }}
   revisionHistoryLimit: 3
   strategy:
     rollingUpdate:
@@ -36,7 +36,7 @@ spec:
                   apiVersion: v1
                   fieldPath: status.hostIP
           {{- end }}
-          image: "{{ .Values.apiserver.image.repository }}:{{ .Values.apiserver.image.tag }}"
+          image: {{ .Values.apiserver.image.repository }}:{{ .Values.apiserver.image.tag | default (printf "v%s" .Values.cluster.version) }}
           imagePullPolicy: {{ .Values.apiserver.image.pullPolicy }}
           command:
             - kube-apiserver

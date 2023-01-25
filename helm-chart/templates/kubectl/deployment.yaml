@@ -10,7 +10,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "2"
 spec:
-  replicas: 1
+  replicas: {{ .Values.kubectl.replicas }}
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -25,7 +25,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: kubectl
-          image: "{{ .Values.kubectl.image.repository }}:{{ .Values.kubectl.image.tag }}"
+          image: {{ .Values.kubectl.image.repository }}:{{ .Values.kubectl.image.tag | default .Values.cluster.version }}
           imagePullPolicy: {{ .Values.kubectl.image.pullPolicy }}
           env:
             - name: KUBECONFIG

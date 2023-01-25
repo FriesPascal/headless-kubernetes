@@ -9,7 +9,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "2"
 spec:
-  replicas: 3
+  replicas: {{ .Values.scheduler.replicas }}
   strategy:
     rollingUpdate:
       maxSurge: 0
@@ -28,8 +28,8 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: kube-scheduler
-          image: "{{ .Values.controllers.images.scheduler.repository }}:{{ .Values.controllers.images.scheduler.tag }}"
-          imagePullPolicy: {{ .Values.controllers.images.scheduler.pullPolicy }}
+          image: {{ .Values.scheduler.image.repository }}:{{ .Values.scheduler.image.tag | default (printf "v%s" .Values.cluster.version) }}
+          imagePullPolicy: {{ .Values.scheduler.image.pullPolicy }}
           command:
             - kube-scheduler
             - --config=/etc/kubernetes/config.yaml
