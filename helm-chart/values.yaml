@@ -3,7 +3,7 @@ pki:
 etcd:
   # Note that downscaling etcd requires a step-by-step procedure, including
   # manual deletion of members, so that quorum can be maintained at all times.
-  repliacs: 3
+  replicas: 3
   persistence:
     storageClass: local-path
     size: 5Gi
