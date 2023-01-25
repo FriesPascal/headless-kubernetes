@@ -28,16 +28,27 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: apiserver
+          {{- if .Values.apiserver.endpointReconciliationEnabled }}
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+          {{- end }}
           image: "{{ .Values.apiserver.image.repository }}:{{ .Values.apiserver.image.tag }}"
           imagePullPolicy: {{ .Values.apiserver.image.pullPolicy }}
           command:
             - kube-apiserver
+            {{- if .Values.apiserver.endpointReconciliationEnabled }}
+            - --advertise-address=$(HOST_IP)
+            {{- end }}
             - --allow-privileged=true
             - --authorization-mode=Node,RBAC
             - --bind-address=0.0.0.0
             - --client-ca-file=/etc/kubernetes/kubelet-client-auth/ca.crt
             - --enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
-            - --endpoint-reconciler-type=none
+            - --endpoint-reconciler-type={{ ternary "lease" "none" .Values.apiserver.endpointReconciliationEnabled }}
             - --etcd-cafile=/etc/kubernetes/etcd-client-auth/ca.crt
             - --etcd-certfile=/etc/kubernetes/etcd-client-auth/tls.crt
             - --etcd-keyfile=/etc/kubernetes/etcd-client-auth/tls.key
@@ -52,7 +63,7 @@ spec:
             - --kubelet-client-key=/etc/kubernetes/kubelet-client-auth/tls.key
             - --kubelet-preferred-address-types=InternalIP
             - --runtime-config=api/all=true
-            - --secure-port=443
+            - --secure-port={{ ternary .Values.apiserver.nodePort "6443" .Values.apiserver.endpointReconciliationEnabled }}
             - --service-account-key-file=/etc/kubernetes/signing/tls.crt
             - --service-account-signing-key-file=/etc/kubernetes/signing/tls.key
             - --service-account-issuer=https://{{ include "headless-kubernetes.fullname" . }}-apiserver:443
@@ -63,7 +74,7 @@ spec:
             - --v=2
           ports:
             - name: https
-              containerPort: 443
+              containerPort: {{ ternary .Values.apiserver.nodePort "6443" .Values.apiserver.endpointReconciliationEnabled }} 
           securityContext:
             runAsUser: 1001
             runAsGroup: 1001
