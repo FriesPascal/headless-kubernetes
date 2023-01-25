@@ -42,8 +42,11 @@ spec:
             - --etcd-certfile=/etc/kubernetes/etcd-client-auth/tls.crt
             - --etcd-keyfile=/etc/kubernetes/etcd-client-auth/tls.key
             - --etcd-servers=https://{{ include "headless-kubernetes.fullname" . }}-etcd:2379
-            - --event-ttl={{ .Values.cluster.eventTtl }}
+            - --event-ttl={{ .Values.apiserver.eventTtl }}
+            {{- if .Values.apiserver.encryptionAtRest.enabled }}
             - --encryption-provider-config=/etc/kubernetes/encryption/config.yaml
+            - --encryption-provider-config-automatic-reload=true
+            {{- end }}
             - --kubelet-certificate-authority=/etc/kubernetes/kubelet-client-auth/ca.crt
             - --kubelet-client-certificate=/etc/kubernetes/kubelet-client-auth/tls.crt
             - --kubelet-client-key=/etc/kubernetes/kubelet-client-auth/tls.key
@@ -68,8 +71,11 @@ spec:
               drop: [ALL]
               add: [NET_BIND_SERVICE]
           volumeMounts:
+            {{- if .Values.apiserver.encryptionAtRest.enabled }}
             - name: encryption-config
-              mountPath: /etc/kubernetes/encryption
+              mountPath: /etc/kubernetes/encryption/config.yaml
+              subPath: {{ ternary "config.yaml" .Values.apiserver.encryptionAtRest.existingSecretKey .Values.apiserver.encryptionAtRest.generateSecret }} 
+            {{- end }}
             - name: etcd-client-auth
               mountPath: /etc/kubernetes/etcd-client-auth
             - name: kubelet-client-auth
@@ -80,9 +86,11 @@ spec:
               mountPath: /etc/kubernetes/signing
       restartPolicy: Always
       volumes:
+        {{- if .Values.apiserver.encryptionAtRest.enabled }}
         - name: encryption-config
           secret:
-            secretName: {{ include "headless-kubernetes.fullname" . }}-encryption-config
+            secretName: {{ ternary (printf "%s-encryption-config" (include "headless-kubernetes.fullname" . )) .Values.apiserver.encryptionAtRest.existingSecretName .Values.apiserver.encryptionAtRest.generateSecret }} 
+        {{- end }}
         - name: etcd-client-auth
           secret:
             secretName: {{ include "headless-kubernetes.fullname" . }}-apiserver-etcd-client-auth
