@@ -10,7 +10,6 @@ metadata:
     helm.sh/hook-weight: "3"
 data:
   kubelet-api-admin-clusterrolebinding.yaml: |
-    ---
     apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
@@ -23,23 +22,3 @@ data:
       - apiGroup: rbac.authorization.k8s.io
         kind: User
         name: kubernetes
-  cluster-info-configmap.yaml: |
-    ---
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: cluster-info
-      namespace: kube-public
-    data:
-      kubeconfig: |
-        apiVersion: v1
-        clusters:
-          - cluster:
-              certificate-authority-data: CA_DATA
-              server: https://{{ .Values.cluster.clusterLbAddress }}:{{ .Values.apiserver.nodePort }}
-            name: ""
-        contexts: []
-        current-context: ""
-        kind: Config
-        preferences: {}
-        users: []

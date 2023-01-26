@@ -24,11 +24,10 @@ spec:
             - name: KUBECONFIG
               value: /etc/kubernetes/config.yaml
           command:
-            - bash
-            - -c
-            - |
-                CA_DATA=`base64 -w0 /etc/kubernetes/client-auth/ca.crt`
-                find /etc/kubernetes/manifests -name "*.yaml" -exec sed "s|CA_DATA|$CA_DATA|" {} \; | kubectl apply -f -
+            - kubectl
+            - apply
+            - -f
+            - /etc/kubernetes/manifests
           volumeMounts:
             - name: client-auth
               mountPath: /etc/kubernetes/client-auth
