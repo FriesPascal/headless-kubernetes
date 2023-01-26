@@ -27,9 +27,8 @@ spec:
             - bash
             - -c
             - |
-                SERVER_CA_B64=`base64 -w0 /etc/kubernetes/client-auth/ca.crt`
-                sed -i "s|SERVER_CA_B64|$SERVER_CA_B64|" /etc/kubernetes/manifests/cluster-info-configmap.yaml
-                kubectl apply -f /etc/kubernetes/manifests
+                CA_DATA=`base64 -w0 /etc/kubernetes/client-auth/ca.crt`
+                find /etc/kubernetes/manifests -name "*.yaml" -exec sed "s|CA_DATA|$CA_DATA|" {} \; | kubectl apply -f -
           volumeMounts:
             - name: client-auth
               mountPath: /etc/kubernetes/client-auth
