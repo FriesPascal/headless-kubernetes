@@ -38,8 +38,7 @@ apiserver:
     # proper key rotation manually.
     existingSecretName: "encryption-config"
     existingSecretKey: "config.yaml"
-  additionalDnsNames:
-    - kubernetes.atix-training.de
+  additionalDnsNames: []
   additionalIpAddresses: []
 
 kubectl:
@@ -70,3 +69,4 @@ cluster:
   clusterIpServiceCidr: 10.32.0.0/24
   kubernetesServiceClusterIp: 10.32.0.1
   nodePortRange: 30000-32767
+  clusterLbAddress: gitops-argocd-main.atix-training.de

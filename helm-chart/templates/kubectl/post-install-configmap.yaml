@@ -22,3 +22,22 @@ data:
       - apiGroup: rbac.authorization.k8s.io
         kind: User
         name: kubernetes
+  cluster-info-configmap.yaml: |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cluster-info
+      namespace: kube-public
+    data:
+      kubeconfig: |
+        apiVersion: v1
+        clusters:
+          - cluster:
+              certificate-authority-data: SERVER_CA_B64
+              server: https://{{ .Values.cluster.clusterLbAddress }}:{{ .Values.apiserver.nodePort }}
+            name: ""
+        contexts: []
+        current-context: ""
+        kind: Config
+        preferences: {}
+        users: []

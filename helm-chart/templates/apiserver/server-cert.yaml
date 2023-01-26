@@ -23,6 +23,7 @@ spec:
     - "kubernetes.default.svc.cluster"
     - "kubernetes.default.svc.cluster.local"
     - "{{ include "headless-kubernetes.fullname" . }}-apiserver"
+    - "{{ .Values.cluster.clusterLbAddress }}"
   {{- range .Values.apiserver.additionalDnsNames }}
     - {{ quote . }}
   {{- end }}
