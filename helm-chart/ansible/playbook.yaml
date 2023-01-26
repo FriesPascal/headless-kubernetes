@@ -117,6 +117,12 @@
           dest: "kube-proxy/config.yaml"
         - src: "kubeconfig.yaml"
           dest: "kube-proxy/kubeconfig.yaml"
+        - src: "containerd.service"
+          dest: "systemd/system/containerd.service"
+        - src: "kubelet.service"
+          dest: "systemd/system/kubelet.service"
+        - src: "kube-proxy.service"
+          dest: "systemd/system/kube-proxy.service"
       notify:
         - "Restart kubernetes"
 
@@ -142,20 +148,6 @@
         - src: "{{ kube_kube_proxy_certs_dir }}/tls.key"
           dest: "kube-proxy/tls.key"
           mode: "0600"
-      notify:
-        - "Restart kubernetes"
-
-    - name: Setup unit files
-      copy:
-        src: "{{ item }}"
-        dest: "/etc/systemd/system/"
-        mode: "0644"
-        owner: "root"
-        group: "root"
-      loop:
-        - "containerd.service"
-        - "kubelet.service"
-        - "kube-proxy.service"
       notify:
         - "Restart kubernetes"
 

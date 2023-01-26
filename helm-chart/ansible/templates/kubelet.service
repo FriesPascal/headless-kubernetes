@@ -6,10 +6,11 @@ Requires=containerd.service
 
 [Service]
 ExecStart=/usr/local/bin/kubelet \
-  --config=/var/lib/kubelet/kubelet-config.yaml \
+  --config=/etc/kubelet/config.yaml \
   --container-runtime=remote \
   --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
-  --kubeconfig=/var/lib/kubelet/kubeconfig.yaml \
+  --hostname-override={{ kube_node_name }} \
+  --kubeconfig=/etc/kubelet/kubeconfig.yaml \
   --register-node=true \
   --v=2
 Restart=on-failure

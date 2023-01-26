@@ -29,6 +29,7 @@ data:
         {{ .name }}:
           ansible_host: "{{ .ipAddress }}"
           kube_kubelet_certs_dir: "/etc/ansible/certs/kubelet-{{ .name }}"
+          kube_node_name: "{{ .name }}"
         {{- end }}
   playbook.yaml: |
 {{ .Files.Get "ansible/playbook.yaml" | indent 4 }}
