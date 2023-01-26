@@ -34,8 +34,7 @@ spec:
             - name: ansible-templates
               mountPath: /etc/ansible/templates
             - name: ssh
-              mountPath: /etc/ansible/id_rsa
-              subPath: {{ .Values.nodes.sshSecretKey }}
+              mountPath: /etc/ansible/ssh
             - name: kube-proxy
               mountPath: /etc/ansible/certs/kube-proxy
             {{- range .Values.nodes.nodes }}
@@ -56,7 +55,7 @@ spec:
         - name: ssh
           secret:
             secretName: {{ .Values.nodes.sshSecretName }}
-            defaultMode: 0600
+            defaultMode: 0400
         - name: kube-proxy
           secret:
             secretName: {{ include "headless-kubernetes.fullname" . }}-kube-proxy
