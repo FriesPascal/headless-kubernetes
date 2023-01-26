@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: post-install
     {{- include "headless-kubernetes.labels" . | nindent 4 }}
   annotations:
-    helm.sh/hook-weight: "2"
+    helm.sh/hook-weight: "3"
 data:
   kubelet-api-admin-clusterrolebinding.yaml: |
     apiVersion: rbac.authorization.k8s.io/v1
