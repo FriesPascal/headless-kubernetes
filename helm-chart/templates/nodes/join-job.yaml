@@ -25,7 +25,10 @@ spec:
               value: "false"
           workingDir: "/etc/ansible"
           command:
-            - ansible-playbook -i inventory.yaml playbook.yaml
+            - ansible-playbook
+            - -i
+            - inventory.yaml
+            - playbook.yaml
           volumeMounts:
             - name: ansible
               mountPath: /etc/ansible
