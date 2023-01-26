@@ -42,7 +42,7 @@ spec:
               mountPath: /etc/ansible/certs/kube-proxy
             {{- range .Values.nodes.nodes }}
             - name: kubelet-{{ .name }}
-              mountPath: /etc/ansible/certs/{{ .name }}
+              mountPath: /etc/ansible/certs/kubelet-{{ .name }}
             {{- end }}
       restartPolicy: Never
       volumes:
