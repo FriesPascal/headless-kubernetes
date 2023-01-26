@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Job
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-post-install
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: kubectl
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "0"
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: post-install
+        {{- include "headless-kubernetes.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: kubectl
+          image: {{ .Values.kubectl.image.repository }}:{{ .Values.kubectl.image.tag | default .Values.cluster.version }}
+          imagePullPolicy: {{ .Values.kubectl.image.pullPolicy }}
+          env:
+            - name: KUBECONFIG
+              value: /etc/kubernetes/config.yaml
+          command:
+            - kubectl
+            - apply
+            - -f
+            - /etc/kubernetes/manifests
+          volumeMounts:
+            - name: client-auth
+              mountPath: /etc/kubernetes/client-auth
+            - name: config
+              mountPath: /etc/kubernetes/config.yaml
+              subPath: config.yaml
+            - name: manifests
+              mountPath: /etc/kubernetes/manifests
+      restartPolicy: OnFailure
+      volumes:
+        - name: client-auth
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-kubectl
+        - name: config
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-kubectl
+        - name: manifests
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-post-install

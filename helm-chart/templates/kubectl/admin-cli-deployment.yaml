@@ -1,4 +1,4 @@
-{{ if .Values.kubectl.enabled }}
+{{ if .Values.kubectl.adminCli.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,7 +10,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "2"
 spec:
-  replicas: {{ .Values.kubectl.replicas }}
+  replicas: {{ .Values.kubectl.adminCli.replicas }}
   revisionHistoryLimit: 3
   selector:
     matchLabels:

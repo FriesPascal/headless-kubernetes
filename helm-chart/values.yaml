@@ -43,12 +43,13 @@ apiserver:
   additionalIpAddresses: []
 
 kubectl:
-  replicas: 1
+  adminCli:
+    enabled: true
+    replicas: 1
   image:
     repository: bitnami/kubectl
     pullPolicy: IfNotPresent
     tag: ""
-  enabled: true
 
 controllerManager:
   replicas: 3
