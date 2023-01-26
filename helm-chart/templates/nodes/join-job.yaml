@@ -46,13 +46,13 @@ spec:
       volumes:
         - name: ansible
           configMap:
-            name: {{ include "headless-kubernetes.fullname" . }}-ansible
+            name: {{ include "headless-kubernetes.fullname" . }}-nodes
         - name: ansible-files
           configMap:
-            name: {{ include "headless-kubernetes.fullname" . }}-ansible-files
+            name: {{ include "headless-kubernetes.fullname" . }}-nodes-files
         - name: ansible-templates
           configMap:
-            name: {{ include "headless-kubernetes.fullname" . }}-ansible-templates
+            name: {{ include "headless-kubernetes.fullname" . }}-nodes-templates
         - name: ssh
           secret:
             secretName: {{ .Values.nodes.sshSecretName }}
