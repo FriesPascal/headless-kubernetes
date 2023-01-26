@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-join-nodes
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: nodes
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook-weight: "3"
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: nodes
+        {{- include "headless-kubernetes.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: ansible-playbook
+          image: {{ .Values.nodes.image.repository }}:{{ .Values.nodes.image.tag }}
+          imagePullPolicy: {{ .Values.nodes.image.pullPolicy }}
+          env:
+            - name: ANSIBLE_HOST_KEY_CHECKING
+              value: "false"
+          workingDir: "/etc/ansible"
+          command:
+            - ansible-playbook -i inventory.yaml playbook.yaml
+          volumeMounts:
+            - name: ansible
+              mountPath: /etc/ansible
+            - name: ansible-files
+              mountPath: /etc/ansible/files
+            - name: ansible-templates
+              mountPath: /etc/ansible/templates
+            - name: ssh
+              mountPath: /etc/ansible/id_rsa
+              subPath: {{ .Values.nodes.sshSecretKey }}
+            - name: kube-proxy
+              mountPath: /etc/ansible/certs/kube-proxy
+            {{- range .Values.nodes.nodes }}
+            - name: kubelet-{{ .name }}
+              mountPath: /etc/ansible/certs/{{ .name }}
+            {{- end }}
+      restartPolicy: OnFailure
+      volumes:
+        - name: ansible
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-ansible
+        - name: ansible-files
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-ansible-files
+        - name: ansible-templates
+          configMap:
+            name: {{ include "headless-kubernetes.fullname" . }}-ansible-templates
+        - name: ssh
+          secret:
+            secretName: {{ .Values.nodes.sshSecretName }}
+            defaultMode: 0600
+        - name: kube-proxy
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" . }}-kube-proxy
+        {{- range .Values.nodes.nodes }}
+        - name: kubelet-{{ .name }}
+          secret:
+            secretName: {{ include "headless-kubernetes.fullname" $ }}-kubelet-{{ .name }}
+        {{- end }}

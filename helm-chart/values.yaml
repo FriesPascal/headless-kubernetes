@@ -68,5 +68,23 @@ cluster:
   podCidr: 10.200.0.0/16
   clusterIpServiceCidr: 10.32.0.0/24
   kubernetesServiceClusterIp: 10.32.0.1
+  clusterDns: 10.32.0.10
   nodePortRange: 30000-32767
   clusterLbAddress: gitops-argocd-main.atix-training.de
+
+nodes:
+  image:
+    repository: cytopia/ansible
+    tag: 2.11
+    pullPolicy: IfNotresent
+  crictlVersion: "1.26.0"
+  cniVersion: "1.1.2"
+  containerdVrsion: "1.6.15"
+  runcVersion: "1.1.4"
+  kubeletVersion: ""
+  kubeProxyVersion: ""
+  sshSecretName: "id-rsa"
+  sshSecretKey: "ssh-privatekey"
+  nodes:
+    - name: "node-0"
+      ipAddress: "157.90.29.115"

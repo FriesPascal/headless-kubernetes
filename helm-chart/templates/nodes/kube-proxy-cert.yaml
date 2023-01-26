@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "headless-kubernetes.fullname" . }}-kube-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: nodes
+    {{- include "headless-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook-weight: "3"
+spec:
+  commonName: system:kube-proxy
+  secretName: {{ include "headless-kubernetes.fullname" . }}-kube-proxy
+  subject:
+    organizations:
+      - system:node-proxier
+  duration: 8760h0m0s
+  renewBefore: 120h0m0s
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - client auth
+  issuerRef:
+    name: {{ include "headless-kubernetes.fullname" . }}-kubernetes-ca
+    kind: Issuer
+    group: cert-manager.io

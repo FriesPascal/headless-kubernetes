@@ -1,0 +1,182 @@
+- name: Configure node
+  hosts: all
+  tasks:
+    - name: Install OS dependencies
+      apt:
+        name:
+          - "socat"
+          - "conntrack"
+          - "ipset"
+        state: present
+        update_cache: true
+
+    - name: Disable swap for current session
+      command: "swapoff -a"
+      changed_when: false
+
+    - name: Disable swap permanently, persist reboots
+      replace:
+        path: "/etc/fstab"
+        regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+        replace: '#\1\2\3swap\4'
+
+    - name: Enable br_netfilter
+      lineinfile:
+        create: true
+        path: "/etc/modules-load.d/k8s.conf"
+        line: "br_netfilter"
+        state: "present"
+
+    - name: Load br_netfilter
+      modprobe:
+        name: "br_netfilter"
+        state: "present"
+
+    - name: Let iptables see bridged traffic
+      sysctl:
+        name: "{{ item }}"
+        value: '1'
+        state: "present"
+      loop:
+        - "net.bridge.bridge-nf-call-iptables"
+        - "net.bridge.bridge-nf-call-ip6tables"
+        - "net.ipv4.ip_forward"
+
+    - name: Prepare dirs
+      file:
+        state: "directory"
+        path: "{{ item }}"
+        owner: "root"
+        group: "root"
+      loop:
+        - "/etc/cni/net.d"
+        - "/etc/containerd"
+        - "/opt/cni/bin"
+        - "/etc/kubelet"
+        - "/etc/kube-proxy"
+        #- "/etc/kubernetes"
+        #- "/var/run/kubernetes"
+
+    - name: Download binaries
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ kube_crictl_version }}/crictl-v{{ kube_crictl_version }}-linux-amd64.tar.gz"
+          dest: "/tmp/crictl.tar.gz"
+          mode: "0644"
+        - url: "https://github.com/containernetworking/plugins/releases/download/v{{ kube_cni_version }}/cni-plugins-linux-amd64-v{{ kube_cni_version }}.tgz"
+          dest: "/tmp/cni-plugins.tar.gz"
+          mode: "0644"
+        - url: "https://github.com/containerd/containerd/releases/download/v{{ kube_containerd_version }}/containerd-{{ kube_containerd_version }}-linux-amd64.tar.gz"
+          dest: "/tmp/containerd.tar.gz"
+          mode: "0644"
+        - url: "https://github.com/opencontainers/runc/releases/download/v{{ kube_runc_version }}/runc.amd64"
+          dest: "/usr/local/bin/runc"
+          mode: "0755"
+        - url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_kubelet_version }}/bin/linux/amd64/kubelet"
+          dest: "/usr/local/bin/kubelet"
+          mode: "0755"
+        - url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_kube_proxy_version }}/bin/linux/amd64/kube-proxy"
+          dest: "/usr/local/bin/kube-proxy"
+          mode: "0755"
+
+    - name: Extract archived binaries
+      unarchive:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        remote_src: true
+        extra_opts: "{{ item.extra_opts | default('') }}"
+        owner: "root"
+        group: "root"
+      loop:
+        - src: "/tmp/crictl.tar.gz"
+          dest: "/usr/local/bin/"
+        - src: "/tmp/containerd.tar.gz"
+          extra_opts: ["--strip-components=1"]
+          dest: "/bin/"
+        - src: "/tmp/cni-plugins.tar.gz"
+          dest: "/opt/cni/bin/"
+
+    - name: Template config files
+      template:
+        src: "{{ item.src }}"
+        dest: "/etc/{{ item.dest }}"
+        mode: "0644"
+        owner: "root"
+        group: "root"
+      loop:
+        - src: "containerd-config.toml"
+          dest: "containerd/config.toml"
+        - src: "kubelet-config.yaml"
+          dest: "kubelet/config.yaml"
+        - src: "kubeconfig.yaml"
+          dest: "kubelet/kubeconfig.yaml"
+        - src: "kube-proxy-config.yaml"
+          dest: "kube-proxy/config.yaml"
+        - src: "kubeconfig.yaml"
+          dest: "kube-proxy/kubeconfig.yaml"
+      notify:
+        - "Restart kubernetes"
+
+    - name: Copy certs
+      copy:
+        src: "{{ item.src }}"
+        dest: "/etc/{{ item.dest }}"
+        mode: "{{ item.mode | default('0644') }}"
+        owner: "root"
+        group: "root"
+      loop:
+        - src: "{{ kube_kubelet_certs_dir }}/ca.crt"
+          dest: "kubelet/ca.crt"
+        - src: "{{ kube_kubelet_certs_dir }}/tls.crt"
+          dest: "kubelet/tls.crt"
+        - src: "{{ kube_kubelet_certs_dir }}/tls.key"
+          dest: "kubelet/tls.key"
+          mode: "0600"
+        - src: "{{ kube_kube-proxy_certs_dir }}/ca.crt"
+          dest: "kube-proxy/ca.crt"
+        - src: "{{ kube_kube-proxy_certs_dir }}/tls.crt"
+          dest: "kube-proxy/tls.crt"
+        - src: "{{ kube_kube-proxy_certs_dir }}/tls.key"
+          dest: "kube-proxy/tls.key"
+          mode: "0600"
+      notify:
+        - "Restart kubernetes"
+
+    - name: Setup unit files
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/systemd/system/"
+        mode: "0644"
+        owner: "root"
+        group: "root"
+      loop:
+        - "containerd.service"
+        - "kubelet.service"
+        - "kube-proxy.service"
+      notify:
+        - "Restart kubernetes"
+
+    - name: Start kubernetes
+      service:
+        name: "{{ item }}"
+        state: "started"
+        daemon_reload: true
+        enabled: true
+      loop:
+        - "containerd"
+        - "kubelet"
+        - "kube-proxy"
+
+  handlers:
+    - name: Restart kubernetes
+      service:
+        name: "{{ item }}"
+        state: "restarted"      
+        daemon_reload: true
+      loop:
+        - "containerd"
+        - "kubelet"
+        - "kube-proxy"
