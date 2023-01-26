@@ -87,4 +87,4 @@ nodes:
   sshSecretKey: "ssh-privatekey"
   nodes:
     - name: "node-0"
-      ipAddress: "157.90.29.115"
+      ipAddress: "94.130.231.205"
