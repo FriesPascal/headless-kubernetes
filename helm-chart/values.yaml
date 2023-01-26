@@ -76,7 +76,7 @@ nodes:
   image:
     repository: cytopia/ansible
     tag: 2.11
-    pullPolicy: IfNotresent
+    pullPolicy: IfNotPresent
   crictlVersion: "1.26.0"
   cniVersion: "1.1.2"
   containerdVrsion: "1.6.15"
