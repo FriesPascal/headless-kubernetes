@@ -44,7 +44,7 @@ spec:
             - name: kubelet-{{ .name }}
               mountPath: /etc/ansible/certs/{{ .name }}
             {{- end }}
-      restartPolicy: OnFailure
+      restartPolicy: Never
       volumes:
         - name: ansible
           configMap:

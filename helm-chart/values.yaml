@@ -78,8 +78,8 @@ nodes:
     tag: 2.11
     pullPolicy: IfNotPresent
   crictlVersion: "1.26.0"
-  cniVersion: "1.1.2"
-  containerdVrsion: "1.6.15"
+  cniVersion: "1.2.0"
+  containerdVersion: "1.6.15"
   runcVersion: "1.1.4"
   kubeletVersion: ""
   kubeProxyVersion: ""

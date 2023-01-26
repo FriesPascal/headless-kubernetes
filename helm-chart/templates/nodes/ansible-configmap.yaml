@@ -18,10 +18,10 @@ data:
         kube_cluster_cidr: "{{ .Values.cluster.podCidr }}"
         kube_cluster_dns: "{{ .Values.cluster.clusterDns }}"
         kube_cni_version: "{{ .Values.nodes.cniVersion }}"
-        kube_crictl_version: "{{ .Values.nodes.crictlVersion | default (printf "v%s" .Values.cluster.version) }}"
+        kube_crictl_version: "{{ .Values.nodes.crictlVersion | default .Values.cluster.version }}"
         kube_containerd_version: "{{ .Values.nodes.containerdVersion }}"
-        kube_kube_proxy_version: "{{ .Values.nodes.kubeProxyVersion | default (printf "v%s" .Values.cluster.version) }}"
-        kube_kubelet_version: "{{ .Values.nodes.kubeletVersion | default (printf "v%s" .Values.cluster.version) }}"
+        kube_kube_proxy_version: "{{ .Values.nodes.kubeProxyVersion | default .Values.cluster.version }}"
+        kube_kubelet_version: "{{ .Values.nodes.kubeletVersion | default .Values.cluster.version }}"
         kube_runc_version: "{{ .Values.nodes.runcVersion }}"
         kube_kube_proxy_certs_dir: "/etc/ansible/certs/kube-proxy"
       hosts:
