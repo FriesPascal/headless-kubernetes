@@ -1,3 +1,4 @@
+{{ if .Values.nodes.join }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -66,3 +67,4 @@ spec:
           secret:
             secretName: {{ include "headless-kubernetes.fullname" $ }}-kubelet-{{ .name }}
         {{- end }}
+{{ end }}

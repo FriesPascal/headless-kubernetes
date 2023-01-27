@@ -1,3 +1,4 @@
+{{ if .Values.nodes.join }}
 {{ range .Values.nodes.nodes }}
 ---
 apiVersion: cert-manager.io/v1
@@ -30,4 +31,5 @@ spec:
     name: {{ include "headless-kubernetes.fullname" $ }}-kubernetes-ca
     kind: Issuer
     group: cert-manager.io
+{{ end }}
 {{ end }}

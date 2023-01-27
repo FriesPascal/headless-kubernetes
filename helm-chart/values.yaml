@@ -73,6 +73,7 @@ cluster:
   clusterLbAddress: gitops-argocd-main.atix-training.de
 
 nodes:
+  join: true
   image:
     repository: cytopia/ansible
     tag: 2.11-tools
@@ -85,6 +86,7 @@ nodes:
   kubeProxyVersion: ""
   sshSecretName: "id-rsa"
   sshSecretKey: "ssh-privatekey"
-  nodes:
-    - name: "node-0"
-      ipAddress: "94.130.231.205"
+  nodes: []
+  # Every node needs a name and an IP address, e.g.,
+  # - name: "node-0"
+  #   ipAddress: "127.0.0.1"
