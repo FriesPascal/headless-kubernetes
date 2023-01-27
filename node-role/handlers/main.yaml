@@ -1,0 +1,9 @@
+- name: Restart kubernetes
+  service:
+    name: "{{ item }}"
+    state: "restarted"      
+    daemon_reload: true
+  loop:
+    - "containerd"
+    - "kubelet"
+    - "kube-proxy"
