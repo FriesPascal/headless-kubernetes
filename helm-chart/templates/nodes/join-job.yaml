@@ -23,19 +23,18 @@ spec:
           env:
             - name: ANSIBLE_HOST_KEY_CHECKING
               value: "false"
+            - name: ANSIBLE_ROLES_PATH
+              value: "/tmp"
           workingDir: "/etc/ansible"
           command:
-            - ansible-playbook
-            - -i
-            - inventory.yaml
-            - playbook.yaml
+            - sh
+            - -c
+            - |
+                ansible-galaxy install -r requirements.yaml
+                ansible-playbook -i inventory.yaml playbook.yaml
           volumeMounts:
             - name: ansible
               mountPath: /etc/ansible
-            - name: ansible-files
-              mountPath: /etc/ansible/files
-            - name: ansible-templates
-              mountPath: /etc/ansible/templates
             - name: ssh
               mountPath: /etc/ansible/ssh
             - name: kube-proxy

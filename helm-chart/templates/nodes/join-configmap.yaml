@@ -32,4 +32,13 @@ data:
           kube_node_name: "{{ .name }}"
         {{- end }}
   playbook.yaml: |
-{{ .Files.Get "ansible/playbook.yaml" | indent 4 }}
+    - name: Join nodes
+      hosts: all
+      roles:
+        - "common/node-role"
+  requirements.yaml: |
+    roles:
+      - name: "common"
+        scm: "git"
+        version: "main"
+        src: "https://git.atix.de/showcases/headless-kubernetes.git"

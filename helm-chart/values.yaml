@@ -75,7 +75,7 @@ cluster:
 nodes:
   image:
     repository: cytopia/ansible
-    tag: 2.11
+    tag: 2.11-tools
     pullPolicy: IfNotPresent
   crictlVersion: "1.26.0"
   cniVersion: "1.2.0"
