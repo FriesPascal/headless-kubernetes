@@ -42,5 +42,5 @@ data:
       - name: "common"
         scm: "git"
         version: "main"
-        src: "https://git.atix.de/showcases/headless-kubernetes.git"
+        src: "https://github.com/FriesPascal/headless-kubernetes.git"
 {{ end }}
