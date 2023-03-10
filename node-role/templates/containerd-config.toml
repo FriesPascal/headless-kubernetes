@@ -1,7 +1,7 @@
-[plugins]
-[plugins.cri.containerd]
-snapshotter = "overlayfs"
-[plugins.cri.containerd.default_runtime]
-runtime_type = "io.containerd.runtime.v1.linux"
-runtime_engine = "/usr/local/bin/runc"
-runtime_root = ""
+version = 2
+
+[plugins."io.containerd.grpc.v1.cri".containerd]
+  snapshotter = "overlayfs"
+  default_runtime_name = "runc"
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+    runtime_type = "io.containerd.runc.v2"
