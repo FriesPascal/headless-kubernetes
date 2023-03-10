@@ -77,6 +77,8 @@
     - url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kube_kube_proxy_version }}/bin/linux/amd64/kube-proxy"
       dest: "/usr/local/bin/kube-proxy"
       mode: "0755"
+  notify:
+    - "Restart kubernetes"
 
 - name: Extract archived binaries
   unarchive:
@@ -94,6 +96,8 @@
       dest: "/bin/"
     - src: "/tmp/cni-plugins.tar.gz"
       dest: "/opt/cni/bin/"
+  notify:
+    - "Restart kubernetes"
 
 - name: Template config files
   template:
