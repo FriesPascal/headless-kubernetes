@@ -54,6 +54,7 @@
 
 - name: Download binaries
   get_url:
+    force: true
     url: "{{ item.url }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
